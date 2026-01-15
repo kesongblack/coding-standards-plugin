@@ -9,7 +9,7 @@
       "description": "Multi-language coding standards system with auto-detection and enforcement for Laravel, Next.js, and Flutter projects",
       "author": "Coding Standards Plugin Contributors",
       "license": "MIT",
-      "repository": "https://github.com/your-username/coding-standards-plugin",
+      "repository": "https://github.com/kesongblack/coding-standards-plugin",
       "keywords": [
         "coding-standards",
         "laravel",

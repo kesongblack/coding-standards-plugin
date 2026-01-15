@@ -21,7 +21,7 @@ Build a global, multi-language coding standards system leveraging Claude Code's 
 **Installation:**
 ```bash
 # Clone to projects folder
-git clone https://github.com/your-username/coding-standards-plugin.git ~/projects/coding-standards-plugin
+git clone https://github.com/kesongblack/coding-standards-plugin.git ~/projects/coding-standards-plugin
 
 # Symlink into Claude Code plugins directory
 ln -s ~/projects/coding-standards-plugin ~/.claude/plugins/coding-standards

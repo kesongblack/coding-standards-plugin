@@ -17,7 +17,7 @@ A comprehensive, multi-language coding standards system for Claude Code that aut
 
 ```bash
 # Clone to projects folder
-git clone https://github.com/your-username/coding-standards-plugin.git ~/projects/coding-standards-plugin
+git clone https://github.com/kesongblack/coding-standards-plugin.git ~/projects/coding-standards-plugin
 
 # Run installer (creates symlink to ~/.claude/plugins/)
 ~/projects/coding-standards-plugin/scripts/install.sh
@@ -29,7 +29,7 @@ git clone https://github.com/your-username/coding-standards-plugin.git ~/project
 
 ```bash
 # Clone repository
-git clone https://github.com/your-username/coding-standards-plugin.git ~/projects/coding-standards-plugin
+git clone https://github.com/kesongblack/coding-standards-plugin.git ~/projects/coding-standards-plugin
 
 # Create symlink
 ln -s ~/projects/coding-standards-plugin ~/.claude/plugins/coding-standards
@@ -287,7 +287,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## Support
 
 For issues, feature requests, or contributions:
-- GitHub Issues: https://github.com/your-username/coding-standards-plugin/issues
+- GitHub Issues: https://github.com/kesongblack/coding-standards-plugin/issues
 - Documentation: See this README and inline documentation in standards files
 
 ## Changelog

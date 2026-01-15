@@ -10,7 +10,7 @@ This is a **pre-production testing release**. Use in isolated test projects only
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/coding-standards-plugin.git ~/projects/coding-standards-plugin
+git clone https://github.com/kesongblack/coding-standards-plugin.git ~/projects/coding-standards-plugin
 
 # Checkout the beta tag
 cd ~/projects/coding-standards-plugin
@@ -28,7 +28,7 @@ If you already have a production version installed, you can test the beta separa
 
 ```bash
 # Clone to a different location
-git clone https://github.com/your-username/coding-standards-plugin.git ~/projects/coding-standards-plugin-beta
+git clone https://github.com/kesongblack/coding-standards-plugin.git ~/projects/coding-standards-plugin-beta
 cd ~/projects/coding-standards-plugin-beta
 git checkout v0.9.0-beta
 
@@ -232,7 +232,7 @@ If you encounter issues during testing, please check:
 2. Plugin file permissions
 3. Git submodule status (if applicable)
 
-Create an issue at: https://github.com/your-username/coding-standards-plugin/issues
+Create an issue at: https://github.com/kesongblack/coding-standards-plugin/issues
 
 Include:
 - Claude Code version
