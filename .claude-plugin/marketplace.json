@@ -1,0 +1,38 @@
+{
+  "name": "coding-standards",
+  "displayName": "Coding Standards Plugin",
+  "description": "Multi-language coding standards system with auto-detection and enforcement",
+  "plugins": {
+    "coding-standards": {
+      "name": "coding-standards",
+      "displayName": "Coding Standards",
+      "description": "Multi-language coding standards system with auto-detection and enforcement for Laravel, Next.js, and Flutter projects",
+      "author": "Coding Standards Plugin Contributors",
+      "license": "MIT",
+      "repository": "https://github.com/your-username/coding-standards-plugin",
+      "keywords": [
+        "coding-standards",
+        "laravel",
+        "nextjs",
+        "flutter",
+        "code-quality",
+        "best-practices",
+        "audit",
+        "refactor"
+      ],
+      "versions": {
+        "0.9.0-beta": {
+          "version": "0.9.0-beta",
+          "description": "Beta release for testing",
+          "releaseNotes": "Pre-production testing release with core features"
+        },
+        "1.0.0": {
+          "version": "1.0.0",
+          "description": "Stable release",
+          "releaseNotes": "Production-ready release"
+        }
+      },
+      "latestVersion": "0.9.0-beta"
+    }
+  }
+}
