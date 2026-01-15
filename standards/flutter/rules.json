@@ -1,0 +1,210 @@
+{
+  "version": "1.0.0",
+  "language": "flutter",
+  "lastUpdated": "2026-01-14T00:00:00Z",
+  "categories": {
+    "naming": {
+      "weight": 20,
+      "rules": [
+        {
+          "id": "class-pascalcase",
+          "pattern": "^[A-Z][a-zA-Z0-9]*$",
+          "filePattern": "lib/.*\\.dart$",
+          "severity": "error",
+          "message": "Classes must use PascalCase naming",
+          "docs": "naming.md#classes"
+        },
+        {
+          "id": "file-lowercase",
+          "pattern": "^[a-z][a-z0-9_]*\\.dart$",
+          "filePattern": "lib/.*\\.dart$",
+          "severity": "error",
+          "message": "File names must use lowercase with underscores",
+          "docs": "naming.md#files"
+        },
+        {
+          "id": "private-underscore",
+          "pattern": "^_[a-z]",
+          "severity": "error",
+          "message": "Private members must start with underscore",
+          "docs": "naming.md#private-members"
+        },
+        {
+          "id": "widget-suffix",
+          "pattern": "Widget$|Screen$|Page$",
+          "filePattern": "lib/.*\\.dart$",
+          "severity": "warning",
+          "message": "Widget classes should have descriptive suffixes",
+          "docs": "naming.md#widgets"
+        }
+      ]
+    },
+    "structure": {
+      "weight": 20,
+      "rules": [
+        {
+          "id": "lib-directory",
+          "path": "lib",
+          "severity": "error",
+          "message": "Source code must be in lib/ directory",
+          "docs": "structure.md#lib-directory"
+        },
+        {
+          "id": "feature-based-organization",
+          "path": "lib/features",
+          "severity": "advisory",
+          "message": "Consider feature-based directory structure",
+          "docs": "structure.md#feature-organization"
+        },
+        {
+          "id": "test-directory",
+          "path": "test",
+          "severity": "error",
+          "message": "Tests must be in test/ directory",
+          "docs": "structure.md#test-directory"
+        },
+        {
+          "id": "assets-directory",
+          "path": "assets",
+          "severity": "warning",
+          "message": "Assets should be organized in assets/ directory",
+          "docs": "structure.md#assets"
+        }
+      ]
+    },
+    "patterns": {
+      "weight": 25,
+      "rules": [
+        {
+          "id": "stateless-over-stateful",
+          "pattern": "StatelessWidget",
+          "severity": "info",
+          "message": "Prefer StatelessWidget when state is not needed",
+          "docs": "patterns.md#stateless-widgets"
+        },
+        {
+          "id": "const-constructors",
+          "pattern": "const ",
+          "severity": "warning",
+          "message": "Use const constructors for better performance",
+          "docs": "patterns.md#const-constructors"
+        },
+        {
+          "id": "provider-state-management",
+          "severity": "advisory",
+          "message": "Use Provider, Riverpod, or Bloc for state management",
+          "docs": "patterns.md#state-management"
+        },
+        {
+          "id": "separation-of-concerns",
+          "severity": "advisory",
+          "message": "Separate business logic from UI using services/repositories",
+          "docs": "patterns.md#separation-concerns"
+        }
+      ]
+    },
+    "testing": {
+      "weight": 20,
+      "rules": [
+        {
+          "id": "widget-tests",
+          "pattern": "testWidgets\\(",
+          "filePattern": "test/.*_test\\.dart$",
+          "severity": "info",
+          "message": "Use testWidgets for widget testing",
+          "docs": "testing.md#widget-tests"
+        },
+        {
+          "id": "test-file-naming",
+          "pattern": "_test\\.dart$",
+          "filePattern": "test/.*\\.dart$",
+          "severity": "error",
+          "message": "Test files must end with _test.dart",
+          "docs": "testing.md#file-naming"
+        },
+        {
+          "id": "mock-dependencies",
+          "severity": "advisory",
+          "message": "Use mockito or mocktail for mocking dependencies",
+          "docs": "testing.md#mocking"
+        },
+        {
+          "id": "test-coverage",
+          "metric": "coverage",
+          "threshold": 70,
+          "severity": "warning",
+          "message": "Aim for at least 70% test coverage",
+          "docs": "testing.md#coverage"
+        }
+      ]
+    },
+    "security": {
+      "weight": 15,
+      "rules": [
+        {
+          "id": "secure-storage",
+          "severity": "error",
+          "message": "Use flutter_secure_storage for sensitive data",
+          "docs": "security.md#secure-storage"
+        },
+        {
+          "id": "https-only",
+          "pattern": "http://",
+          "severity": "error",
+          "message": "Use HTTPS for all network requests",
+          "docs": "security.md#https"
+        },
+        {
+          "id": "input-validation",
+          "severity": "warning",
+          "message": "Validate and sanitize all user inputs",
+          "docs": "security.md#input-validation"
+        },
+        {
+          "id": "api-keys-env",
+          "pattern": "\\.env",
+          "severity": "warning",
+          "message": "Store API keys in environment variables, not in code",
+          "docs": "security.md#api-keys"
+        }
+      ]
+    },
+    "production": {
+      "weight": 15,
+      "rules": [
+        {
+          "id": "debug-banner-disabled",
+          "pattern": "debugShowCheckedModeBanner:\\s*true",
+          "filePattern": "lib/.*\\.dart$",
+          "severity": "error",
+          "message": "Debug banner must be disabled in production (set to false)",
+          "docs": "production.md#debug-banner"
+        },
+        {
+          "id": "no-print-statements",
+          "pattern": "\\bprint\\s*\\(|\\bdebugPrint\\s*\\(",
+          "filePattern": "lib/.*\\.dart$",
+          "severity": "warning",
+          "message": "Print statements should be removed in production",
+          "docs": "production.md#print-statements"
+        },
+        {
+          "id": "release-signing",
+          "pattern": "signingConfig\\s+signingConfigs\\.release",
+          "filePattern": "android/app/build\\.gradle$",
+          "severity": "error",
+          "message": "Release signing configuration must be set up",
+          "docs": "production.md#release-signing"
+        },
+        {
+          "id": "no-kdebugmode-unchecked",
+          "pattern": "kDebugMode(?!\\s*[?)])",
+          "filePattern": "lib/.*\\.dart$",
+          "severity": "warning",
+          "message": "kDebugMode should be used with conditional checks",
+          "docs": "production.md#debug-mode"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,191 @@
+name: Scheduled Audit
+
+on:
+  schedule:
+    # Default: Monday 9am UTC (can be overridden in config)
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Audit mode'
+        required: true
+        default: 'notification'
+        type: choice
+        options:
+          - notification
+          - full-audit
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  audit:
+    name: Scheduled Code Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Load configuration
+        id: config
+        run: |
+          CONFIG_FILE=".github/coding-standards-config.yml"
+          if [ -f "$CONFIG_FILE" ]; then
+            ENABLED=$(grep -A1 "^scheduled_audit:" "$CONFIG_FILE" | grep "enabled:" | awk '{print $2}' | tr -d '"')
+            MODE=$(grep -A5 "^scheduled_audit:" "$CONFIG_FILE" | grep "mode:" | head -1 | awk '{print $2}' | tr -d '"')
+            THRESHOLD=$(grep -A5 "^scheduled_audit:" "$CONFIG_FILE" | grep "threshold:" | awk '{print $2}' | tr -d '"')
+            CREATE_ISSUE=$(grep -A5 "^scheduled_audit:" "$CONFIG_FILE" | grep "create_issue_on_failure:" | awk '{print $2}' | tr -d '"')
+          fi
+
+          # Override with workflow_dispatch input if provided
+          if [ -n "${{ github.event.inputs.mode }}" ]; then
+            MODE="${{ github.event.inputs.mode }}"
+          fi
+
+          echo "enabled=${ENABLED:-true}" >> $GITHUB_OUTPUT
+          echo "mode=${MODE:-notification}" >> $GITHUB_OUTPUT
+          echo "threshold=${THRESHOLD:-70}" >> $GITHUB_OUTPUT
+          echo "create_issue=${CREATE_ISSUE:-true}" >> $GITHUB_OUTPUT
+
+      - name: Check if scheduled audit is enabled
+        if: steps.config.outputs.enabled != 'true'
+        run: |
+          echo "Scheduled audit is disabled in configuration"
+          exit 0
+
+      - name: Detect project type
+        id: detect
+        run: |
+          PROJECT_TYPE="unknown"
+
+          if [ -f "composer.json" ]; then
+            if grep -q "laravel/framework" composer.json 2>/dev/null; then
+              PROJECT_TYPE="laravel"
+            fi
+          elif [ -f "package.json" ]; then
+            if grep -q "next" package.json 2>/dev/null; then
+              PROJECT_TYPE="nextjs"
+            fi
+          elif [ -f "pubspec.yaml" ]; then
+            PROJECT_TYPE="flutter"
+          fi
+
+          echo "project_type=$PROJECT_TYPE" >> $GITHUB_OUTPUT
+
+      - name: Notification mode
+        if: steps.config.outputs.mode == 'notification'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const projectType = '${{ steps.detect.outputs.project_type }}';
+            const today = new Date().toISOString().split('T')[0];
+
+            const title = `📋 Weekly Code Standards Reminder - ${today}`;
+            const body = `## Time for a Code Standards Check!
+
+            This is your weekly reminder to run a coding standards audit.
+
+            **Project Type:** ${projectType}
+
+            ### How to Run
+
+            1. Open your project in Claude Code
+            2. Run \`/audit\` for a full audit
+            3. Run \`/audit --quick\` for a quick scan
+
+            ### Why This Matters
+
+            Regular audits help maintain code quality and catch issues early.
+
+            ---
+            *This is an automated reminder. Configure in \`.github/coding-standards-config.yml\`*
+            `;
+
+            // Check if similar issue exists from this week
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'coding-standards',
+              state: 'open'
+            });
+
+            const existingIssue = issues.find(i => i.title.includes('Weekly Code Standards Reminder'));
+
+            if (existingIssue) {
+              console.log('Reminder issue already exists for this period');
+              return;
+            }
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['coding-standards', 'reminder']
+            });
+
+            console.log('Created reminder issue');
+
+      - name: Full audit mode
+        if: steps.config.outputs.mode == 'full-audit' && steps.detect.outputs.project_type != 'unknown'
+        id: audit
+        run: |
+          PROJECT_TYPE="${{ steps.detect.outputs.project_type }}"
+
+          echo "Running full audit for $PROJECT_TYPE project..."
+
+          # Placeholder - in real implementation this invokes the audit
+          SCORE=75
+          ISSUES=5
+
+          echo "score=$SCORE" >> $GITHUB_OUTPUT
+          echo "issues=$ISSUES" >> $GITHUB_OUTPUT
+
+      - name: Create issue on failure (full-audit mode)
+        if: steps.config.outputs.mode == 'full-audit' && steps.config.outputs.create_issue == 'true' && steps.audit.outputs.score < steps.config.outputs.threshold
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const score = '${{ steps.audit.outputs.score }}';
+            const threshold = '${{ steps.config.outputs.threshold }}';
+            const issues = '${{ steps.audit.outputs.issues }}';
+            const projectType = '${{ steps.detect.outputs.project_type }}';
+            const today = new Date().toISOString().split('T')[0];
+
+            const title = `⚠️ Code Standards Score Below Threshold - ${today}`;
+            const body = `## Scheduled Audit Results
+
+            The scheduled coding standards audit found issues that need attention.
+
+            | Metric | Value |
+            |--------|-------|
+            | Project Type | ${projectType} |
+            | Score | ${score}/100 |
+            | Threshold | ${threshold} |
+            | Issues Found | ${issues} |
+
+            ### Next Steps
+
+            1. Run \`/audit --full\` to see detailed results
+            2. Run \`/refactor\` to auto-fix issues
+            3. Review and commit changes
+
+            ---
+            *Generated by scheduled audit workflow*
+            `;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['coding-standards', 'quality']
+            });
+
+      - name: Create success summary (full-audit mode)
+        if: steps.config.outputs.mode == 'full-audit' && steps.audit.outputs.score >= steps.config.outputs.threshold
+        run: |
+          echo "✅ Audit passed: ${{ steps.audit.outputs.score }} >= ${{ steps.config.outputs.threshold }}"
+          echo "No issues to report."

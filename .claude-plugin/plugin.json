@@ -1,0 +1,92 @@
+{
+  "name": "coding-standards",
+  "version": "1.0.0",
+  "description": "Multi-language coding standards system with auto-detection and enforcement for Laravel, Next.js, and Flutter projects",
+  "author": "Coding Standards Plugin Contributors",
+  "license": "MIT",
+  "repository": "https://github.com/your-username/coding-standards-plugin",
+  "keywords": [
+    "coding-standards",
+    "laravel",
+    "nextjs",
+    "flutter",
+    "code-quality",
+    "best-practices",
+    "audit",
+    "refactor"
+  ],
+  "main": ".",
+  "engines": {
+    "claude-code": ">=1.0.0"
+  },
+  "hooks": [
+    {
+      "type": "SessionStart",
+      "description": "Auto-detect project type and run quick audit"
+    }
+  ],
+  "commands": [
+    {
+      "name": "audit",
+      "description": "Run codebase audit for coding standards compliance"
+    },
+    {
+      "name": "refactor",
+      "description": "Apply standards to specific file"
+    },
+    {
+      "name": "standards",
+      "description": "View/manage current standards and language settings"
+    },
+    {
+      "name": "explain-standards",
+      "description": "Explain why a standard exists"
+    }
+  ],
+  "skills": [
+    {
+      "name": "coding-standards-core",
+      "description": "Core orchestration for multi-language standards enforcement"
+    },
+    {
+      "name": "laravel-standards",
+      "description": "Laravel-specific coding standards and best practices"
+    },
+    {
+      "name": "nextjs-standards",
+      "description": "Next.js-specific coding standards and best practices"
+    },
+    {
+      "name": "flutter-standards",
+      "description": "Flutter-specific coding standards and best practices"
+    }
+  ],
+  "agents": [
+    {
+      "name": "standards-reviewer",
+      "description": "Review proposed standards changes for quality and conflicts"
+    }
+  ],
+  "configuration": {
+    "enabledLanguages": {
+      "type": "array",
+      "description": "Languages to enable for standards checking",
+      "default": [],
+      "items": {
+        "type": "string",
+        "enum": ["laravel", "nextjs", "flutter"]
+      }
+    },
+    "autoAuditOnStart": {
+      "type": "boolean",
+      "description": "Automatically run quick audit on session start",
+      "default": true
+    },
+    "strictness": {
+      "type": "string",
+      "description": "Strictness level for standards enforcement",
+      "default": "advisory",
+      "enum": ["strict", "advisory"]
+    }
+  }
+}

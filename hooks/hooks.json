@@ -1,0 +1,16 @@
+{
+  "description": "Coding Standards - Auto-detect project and load standards",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/scripts/detect-project.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

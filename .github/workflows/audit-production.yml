@@ -1,0 +1,232 @@
+name: Production Audit
+
+on:
+  push:
+    branches:
+      - production
+      - 'release/*'
+  workflow_dispatch:
+    inputs:
+      fail_on_warning:
+        description: 'Fail on warnings too'
+        required: false
+        default: 'false'
+        type: boolean
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  production-audit:
+    name: Production Safety Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Load configuration
+        id: config
+        run: |
+          CONFIG_FILE=".github/coding-standards-config.yml"
+          if [ -f "$CONFIG_FILE" ]; then
+            ENABLED=$(grep -A1 "^production_audit:" "$CONFIG_FILE" | grep "enabled:" | awk '{print $2}' | tr -d '"')
+            FAIL_ON_ERROR=$(grep -A5 "^production_audit:" "$CONFIG_FILE" | grep "fail_on_error:" | awk '{print $2}' | tr -d '"')
+            FAIL_ON_WARNING=$(grep -A5 "^production_audit:" "$CONFIG_FILE" | grep "fail_on_warning:" | awk '{print $2}' | tr -d '"')
+          fi
+
+          # Override with workflow_dispatch input if provided
+          if [ "${{ github.event.inputs.fail_on_warning }}" = "true" ]; then
+            FAIL_ON_WARNING="true"
+          fi
+
+          echo "enabled=${ENABLED:-true}" >> $GITHUB_OUTPUT
+          echo "fail_on_error=${FAIL_ON_ERROR:-true}" >> $GITHUB_OUTPUT
+          echo "fail_on_warning=${FAIL_ON_WARNING:-false}" >> $GITHUB_OUTPUT
+
+      - name: Check if audit is enabled
+        if: steps.config.outputs.enabled != 'true'
+        run: |
+          echo "Production audit is disabled in configuration"
+          exit 0
+
+      - name: Detect project type
+        id: detect
+        run: |
+          PROJECT_TYPE="unknown"
+
+          if [ -f "composer.json" ]; then
+            if grep -q "laravel/framework" composer.json 2>/dev/null; then
+              PROJECT_TYPE="laravel"
+            fi
+          elif [ -f "package.json" ]; then
+            if grep -q "next" package.json 2>/dev/null; then
+              PROJECT_TYPE="nextjs"
+            fi
+          elif [ -f "pubspec.yaml" ]; then
+            PROJECT_TYPE="flutter"
+          fi
+
+          echo "project_type=$PROJECT_TYPE" >> $GITHUB_OUTPUT
+          echo "Detected project type: $PROJECT_TYPE"
+
+      - name: Skip if unsupported project
+        if: steps.detect.outputs.project_type == 'unknown'
+        run: |
+          echo "::notice::Project type not supported by coding standards plugin"
+          exit 0
+
+      - name: Run Laravel production checks
+        if: steps.detect.outputs.project_type == 'laravel'
+        id: laravel-audit
+        run: |
+          ERRORS=0
+          WARNINGS=0
+          RESULTS=""
+
+          # Check APP_DEBUG in .env files
+          for env_file in .env .env.production; do
+            if [ -f "$env_file" ]; then
+              if grep -q "APP_DEBUG=true" "$env_file"; then
+                RESULTS+="❌ ERROR: APP_DEBUG=true found in $env_file\n"
+                ((ERRORS++))
+              fi
+            fi
+          done
+
+          # Check for .env in public directory
+          if [ -f "public/.env" ]; then
+            RESULTS+="❌ ERROR: .env file found in public directory\n"
+            ((ERRORS++))
+          fi
+
+          # Check for seeders in routes
+          if grep -rq "Artisan::call.*seed" routes/ 2>/dev/null; then
+            RESULTS+="❌ ERROR: Database seeder found callable via routes\n"
+            ((ERRORS++))
+          fi
+
+          # Check for dd/dump in app code
+          DD_COUNT=$(grep -r "\\bdd\s*(" app/ 2>/dev/null | wc -l || echo "0")
+          DUMP_COUNT=$(grep -r "\\bdump\s*(" app/ 2>/dev/null | wc -l || echo "0")
+          if [ "$DD_COUNT" -gt 0 ] || [ "$DUMP_COUNT" -gt 0 ]; then
+            RESULTS+="⚠️ WARNING: Found $DD_COUNT dd() and $DUMP_COUNT dump() calls in app/\n"
+            ((WARNINGS++))
+          fi
+
+          echo "errors=$ERRORS" >> $GITHUB_OUTPUT
+          echo "warnings=$WARNINGS" >> $GITHUB_OUTPUT
+          echo -e "$RESULTS"
+
+      - name: Run Next.js production checks
+        if: steps.detect.outputs.project_type == 'nextjs'
+        id: nextjs-audit
+        run: |
+          ERRORS=0
+          WARNINGS=0
+          RESULTS=""
+
+          # Check for console.log statements
+          CONSOLE_COUNT=$(grep -r "console\.\(log\|warn\|error\|debug\)" --include="*.tsx" --include="*.ts" --include="*.jsx" --include="*.js" app/ components/ lib/ 2>/dev/null | wc -l || echo "0")
+          if [ "$CONSOLE_COUNT" -gt 0 ]; then
+            RESULTS+="⚠️ WARNING: Found $CONSOLE_COUNT console statements\n"
+            ((WARNINGS++))
+          fi
+
+          # Check for required env vars in .env.production
+          if [ ! -f ".env.production" ] && [ ! -f ".env.local" ]; then
+            RESULTS+="⚠️ WARNING: No production environment file found\n"
+            ((WARNINGS++))
+          fi
+
+          echo "errors=$ERRORS" >> $GITHUB_OUTPUT
+          echo "warnings=$WARNINGS" >> $GITHUB_OUTPUT
+          echo -e "$RESULTS"
+
+      - name: Run Flutter production checks
+        if: steps.detect.outputs.project_type == 'flutter'
+        id: flutter-audit
+        run: |
+          ERRORS=0
+          WARNINGS=0
+          RESULTS=""
+
+          # Check for debug banner
+          if grep -rq "debugShowCheckedModeBanner:\s*true" lib/ 2>/dev/null; then
+            RESULTS+="❌ ERROR: debugShowCheckedModeBanner is true\n"
+            ((ERRORS++))
+          fi
+
+          # Check for print statements
+          PRINT_COUNT=$(grep -r "\\bprint\s*(" lib/ 2>/dev/null | wc -l || echo "0")
+          if [ "$PRINT_COUNT" -gt 0 ]; then
+            RESULTS+="⚠️ WARNING: Found $PRINT_COUNT print() statements in lib/\n"
+            ((WARNINGS++))
+          fi
+
+          # Check for release signing config
+          if [ -f "android/app/build.gradle" ]; then
+            if ! grep -q "signingConfig.*release" android/app/build.gradle 2>/dev/null; then
+              RESULTS+="❌ ERROR: Release signing not configured in build.gradle\n"
+              ((ERRORS++))
+            fi
+          fi
+
+          echo "errors=$ERRORS" >> $GITHUB_OUTPUT
+          echo "warnings=$WARNINGS" >> $GITHUB_OUTPUT
+          echo -e "$RESULTS"
+
+      - name: Aggregate results
+        id: results
+        run: |
+          PROJECT_TYPE="${{ steps.detect.outputs.project_type }}"
+
+          case "$PROJECT_TYPE" in
+            laravel)
+              ERRORS="${{ steps.laravel-audit.outputs.errors }}"
+              WARNINGS="${{ steps.laravel-audit.outputs.warnings }}"
+              ;;
+            nextjs)
+              ERRORS="${{ steps.nextjs-audit.outputs.errors }}"
+              WARNINGS="${{ steps.nextjs-audit.outputs.warnings }}"
+              ;;
+            flutter)
+              ERRORS="${{ steps.flutter-audit.outputs.errors }}"
+              WARNINGS="${{ steps.flutter-audit.outputs.warnings }}"
+              ;;
+            *)
+              ERRORS=0
+              WARNINGS=0
+              ;;
+          esac
+
+          echo "errors=${ERRORS:-0}" >> $GITHUB_OUTPUT
+          echo "warnings=${WARNINGS:-0}" >> $GITHUB_OUTPUT
+
+          echo "## Production Audit Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Project Type | $PROJECT_TYPE |" >> $GITHUB_STEP_SUMMARY
+          echo "| Errors | ${ERRORS:-0} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Warnings | ${WARNINGS:-0} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Check for failures
+        run: |
+          ERRORS="${{ steps.results.outputs.errors }}"
+          WARNINGS="${{ steps.results.outputs.warnings }}"
+          FAIL_ON_ERROR="${{ steps.config.outputs.fail_on_error }}"
+          FAIL_ON_WARNING="${{ steps.config.outputs.fail_on_warning }}"
+
+          if [ "$FAIL_ON_ERROR" = "true" ] && [ "${ERRORS:-0}" -gt 0 ]; then
+            echo "::error::Production audit failed with $ERRORS error(s)"
+            exit 1
+          fi
+
+          if [ "$FAIL_ON_WARNING" = "true" ] && [ "${WARNINGS:-0}" -gt 0 ]; then
+            echo "::error::Production audit failed with $WARNINGS warning(s)"
+            exit 1
+          fi
+
+          echo "✅ Production audit passed"

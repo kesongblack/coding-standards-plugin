@@ -1,0 +1,26 @@
+# User-specific files (not shared)
+.local/
+*.local.json
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Test outputs
+tests/**/output/
+tests/**/.cache/
+
+# Temporary files
+*.tmp
+*.log
+
+# The plan itself
+coding-standards-plan

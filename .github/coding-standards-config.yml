@@ -1,0 +1,59 @@
+# Coding Standards Plugin - CI Configuration
+# Copy this file to your project's .github/ directory and customize
+
+# PR Audit Settings
+pr_audit:
+  # Enable/disable PR audit checks
+  enabled: true
+
+  # Minimum score required to pass (0-100)
+  # Set to 0 to allow all scores
+  threshold: 70
+
+  # Audit mode: "quick" (sample key files) or "full" (all files)
+  mode: "quick"
+
+  # Post audit results as PR comment
+  post_comment: true
+
+  # Fail PR if score below threshold
+  fail_on_threshold: true
+
+# Scheduled Audit Settings
+scheduled_audit:
+  # Enable/disable scheduled audits
+  enabled: true
+
+  # Mode: "notification" (reminder only, zero tokens) or "full-audit" (run actual audit)
+  mode: "notification"
+
+  # Cron schedule (default: Monday 9am UTC)
+  cron: "0 9 * * 1"
+
+  # Minimum score threshold (only used in full-audit mode)
+  threshold: 70
+
+  # Create issue when score drops (only used in full-audit mode)
+  create_issue_on_failure: true
+
+# Production Audit Settings
+production_audit:
+  # Enable/disable production safety checks
+  enabled: true
+
+  # Fail deployment on error-level issues
+  fail_on_error: true
+
+  # Optionally fail on warning-level issues too
+  fail_on_warning: false
+
+  # Branches that trigger production audit
+  branches: ["production", "release/*"]
+
+# Release Settings
+release:
+  # Validate standards JSON before release
+  validate_standards: true
+
+  # Auto-generate release notes from CHANGELOG
+  auto_release_notes: true

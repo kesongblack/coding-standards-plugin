@@ -1,0 +1,103 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
+      - name: Validate standards
+        id: validate
+        run: |
+          chmod +x scripts/validate-standards.sh
+          if scripts/validate-standards.sh; then
+            echo "valid=true" >> $GITHUB_OUTPUT
+          else
+            echo "valid=false" >> $GITHUB_OUTPUT
+            echo "::error::Standards validation failed"
+            exit 1
+          fi
+
+      - name: Get version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Extract changelog
+        id: changelog
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          VERSION_NUMBER="${VERSION#v}"
+
+          # Extract changelog section for this version
+          CHANGELOG=""
+          if [ -f "CHANGELOG.md" ]; then
+            # Extract content between this version header and next version header
+            CHANGELOG=$(awk "/^## \[?${VERSION_NUMBER}\]?|^## ${VERSION}[^0-9]/{found=1; next} /^## /{found=0} found" CHANGELOG.md)
+          fi
+
+          if [ -z "$CHANGELOG" ]; then
+            CHANGELOG="No changelog entry found for $VERSION"
+          fi
+
+          # Save to file to handle multiline
+          echo "$CHANGELOG" > /tmp/changelog.txt
+
+      - name: Create release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const version = '${{ steps.version.outputs.version }}';
+            const changelog = fs.readFileSync('/tmp/changelog.txt', 'utf8');
+
+            const body = `## What's New
+
+            ${changelog}
+
+            ## Installation
+
+            \`\`\`bash
+            git clone https://github.com/${{ github.repository }}.git ~/projects/coding-standards-plugin
+            ~/projects/coding-standards-plugin/scripts/install.sh
+            \`\`\`
+
+            ## Updating
+
+            \`\`\`bash
+            cd ~/projects/coding-standards-plugin && git pull
+            \`\`\`
+
+            ---
+            *Full changelog: [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md)*
+            `;
+
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: version,
+              name: `Coding Standards Plugin ${version}`,
+              body: body,
+              draft: false,
+              prerelease: version.includes('-')
+            });
+
+            console.log(`Created release ${version}`);

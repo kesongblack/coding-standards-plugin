@@ -1,0 +1,215 @@
+{
+  "version": "1.0.0",
+  "language": "laravel",
+  "lastUpdated": "2026-01-14T00:00:00Z",
+  "categories": {
+    "naming": {
+      "weight": 20,
+      "rules": [
+        {
+          "id": "controller-suffix",
+          "pattern": ".*Controller$",
+          "filePattern": "app/Http/Controllers/.*\\.php$",
+          "severity": "error",
+          "message": "Controllers must end with 'Controller' suffix",
+          "docs": "naming.md#controllers"
+        },
+        {
+          "id": "model-singular",
+          "pattern": "^[A-Z][a-zA-Z]+$",
+          "filePattern": "app/Models/.*\\.php$",
+          "severity": "error",
+          "message": "Models must use singular PascalCase naming",
+          "docs": "naming.md#models"
+        },
+        {
+          "id": "migration-naming",
+          "pattern": "^\\d{4}_\\d{2}_\\d{2}_\\d{6}_[a-z_]+\\.php$",
+          "filePattern": "database/migrations/.*\\.php$",
+          "severity": "error",
+          "message": "Migrations must follow Laravel naming convention",
+          "docs": "naming.md#migrations"
+        },
+        {
+          "id": "request-suffix",
+          "pattern": ".*Request$",
+          "filePattern": "app/Http/Requests/.*\\.php$",
+          "severity": "error",
+          "message": "Form requests must end with 'Request' suffix",
+          "docs": "naming.md#requests"
+        }
+      ]
+    },
+    "structure": {
+      "weight": 20,
+      "rules": [
+        {
+          "id": "controller-location",
+          "path": "app/Http/Controllers",
+          "severity": "error",
+          "message": "Controllers must be in app/Http/Controllers directory",
+          "docs": "structure.md#controllers"
+        },
+        {
+          "id": "model-location",
+          "path": "app/Models",
+          "severity": "error",
+          "message": "Models must be in app/Models directory",
+          "docs": "structure.md#models"
+        },
+        {
+          "id": "service-location",
+          "path": "app/Services",
+          "severity": "warning",
+          "message": "Service classes should be in app/Services directory",
+          "docs": "structure.md#services"
+        },
+        {
+          "id": "repository-location",
+          "path": "app/Repositories",
+          "severity": "warning",
+          "message": "Repository classes should be in app/Repositories directory",
+          "docs": "structure.md#repositories"
+        }
+      ]
+    },
+    "patterns": {
+      "weight": 25,
+      "rules": [
+        {
+          "id": "no-fat-controllers",
+          "metric": "controller-lines",
+          "threshold": 200,
+          "severity": "warning",
+          "message": "Controllers should not exceed 200 lines - extract to services",
+          "docs": "patterns.md#fat-controllers"
+        },
+        {
+          "id": "eloquent-relationships",
+          "pattern": "function (hasOne|hasMany|belongsTo|belongsToMany|morphTo|morphMany)\\(",
+          "severity": "info",
+          "message": "Use Eloquent relationships instead of manual queries",
+          "docs": "patterns.md#relationships"
+        },
+        {
+          "id": "repository-pattern",
+          "severity": "advisory",
+          "message": "Consider using repository pattern for complex data access",
+          "docs": "patterns.md#repository-pattern"
+        },
+        {
+          "id": "service-layer",
+          "severity": "advisory",
+          "message": "Use service layer for business logic",
+          "docs": "patterns.md#service-layer"
+        }
+      ]
+    },
+    "testing": {
+      "weight": 20,
+      "rules": [
+        {
+          "id": "feature-tests-location",
+          "path": "tests/Feature",
+          "severity": "error",
+          "message": "Feature tests must be in tests/Feature directory",
+          "docs": "testing.md#feature-tests"
+        },
+        {
+          "id": "unit-tests-location",
+          "path": "tests/Unit",
+          "severity": "error",
+          "message": "Unit tests must be in tests/Unit directory",
+          "docs": "testing.md#unit-tests"
+        },
+        {
+          "id": "test-suffix",
+          "pattern": ".*Test$",
+          "filePattern": "tests/.*\\.php$",
+          "severity": "error",
+          "message": "Test classes must end with 'Test' suffix",
+          "docs": "testing.md#naming"
+        },
+        {
+          "id": "test-coverage",
+          "metric": "coverage",
+          "threshold": 70,
+          "severity": "warning",
+          "message": "Aim for at least 70% test coverage",
+          "docs": "testing.md#coverage"
+        }
+      ]
+    },
+    "security": {
+      "weight": 15,
+      "rules": [
+        {
+          "id": "mass-assignment-protection",
+          "pattern": "protected \\$fillable|protected \\$guarded",
+          "filePattern": "app/Models/.*\\.php$",
+          "severity": "error",
+          "message": "Models must define $fillable or $guarded for mass assignment protection",
+          "docs": "security.md#mass-assignment"
+        },
+        {
+          "id": "sql-injection-prevention",
+          "pattern": "DB::raw\\(|->whereRaw\\(|->selectRaw\\(",
+          "severity": "warning",
+          "message": "Use parameterized queries instead of raw SQL when possible",
+          "docs": "security.md#sql-injection"
+        },
+        {
+          "id": "csrf-protection",
+          "pattern": "@csrf",
+          "filePattern": "resources/views/.*\\.blade\\.php$",
+          "severity": "error",
+          "message": "Forms must include @csrf directive",
+          "docs": "security.md#csrf"
+        },
+        {
+          "id": "authorization-checks",
+          "pattern": "\\$this->authorize\\(|Gate::|Policy::",
+          "severity": "warning",
+          "message": "Use Laravel's authorization features for access control",
+          "docs": "security.md#authorization"
+        }
+      ]
+    },
+    "production": {
+      "weight": 15,
+      "rules": [
+        {
+          "id": "debug-disabled",
+          "pattern": "APP_DEBUG=true",
+          "filePattern": "\\.env$",
+          "severity": "error",
+          "message": "APP_DEBUG must be set to false in production",
+          "docs": "production.md#debug-mode"
+        },
+        {
+          "id": "env-not-exposed",
+          "path": "public/.env",
+          "severity": "error",
+          "message": ".env file must not be in public directory",
+          "docs": "production.md#env-exposure"
+        },
+        {
+          "id": "seeders-not-in-routes",
+          "pattern": "Artisan::call\\s*\\(\\s*['\"]db:seed|Artisan::call\\s*\\(\\s*['\"]seed",
+          "filePattern": "routes/.*\\.php$",
+          "severity": "error",
+          "message": "Database seeders must not be callable via routes",
+          "docs": "production.md#seeders"
+        },
+        {
+          "id": "no-dd-dump",
+          "pattern": "\\bdd\\s*\\(|\\bdump\\s*\\(|\\bvar_dump\\s*\\(",
+          "filePattern": "app/.*\\.php$",
+          "severity": "warning",
+          "message": "Debug functions (dd, dump, var_dump) must be removed in production",
+          "docs": "production.md#debug-functions"
+        }
+      ]
+    }
+  }
+}

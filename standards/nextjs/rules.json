@@ -1,0 +1,209 @@
+{
+  "version": "1.0.0",
+  "language": "nextjs",
+  "lastUpdated": "2026-01-14T00:00:00Z",
+  "categories": {
+    "naming": {
+      "weight": 20,
+      "rules": [
+        {
+          "id": "component-pascalcase",
+          "pattern": "^[A-Z][a-zA-Z0-9]*$",
+          "filePattern": "(components|app)/.*\\.(tsx|jsx)$",
+          "severity": "error",
+          "message": "Components must use PascalCase naming",
+          "docs": "naming.md#components"
+        },
+        {
+          "id": "page-kebabcase",
+          "pattern": "^[a-z0-9-]+(/[a-z0-9-]+)*/(page|layout|loading|error)\\.(tsx|jsx)$",
+          "filePattern": "app/.*\\.(tsx|jsx)$",
+          "severity": "error",
+          "message": "App Router files must use kebab-case directory names",
+          "docs": "naming.md#pages"
+        },
+        {
+          "id": "hook-prefix",
+          "pattern": "^use[A-Z]",
+          "filePattern": ".*/(hooks|use[A-Z].*)\\.(ts|js)$",
+          "severity": "error",
+          "message": "Custom hooks must start with 'use' prefix",
+          "docs": "naming.md#hooks"
+        },
+        {
+          "id": "api-route-naming",
+          "pattern": "^[a-z0-9-]+(/[a-z0-9-]+)*/route\\.(ts|js)$",
+          "filePattern": "app/api/.*\\.(ts|js)$",
+          "severity": "error",
+          "message": "API routes must be named 'route.ts/js'",
+          "docs": "naming.md#api-routes"
+        }
+      ]
+    },
+    "structure": {
+      "weight": 20,
+      "rules": [
+        {
+          "id": "app-router-structure",
+          "path": "app",
+          "severity": "error",
+          "message": "Use App Router structure with app/ directory",
+          "docs": "structure.md#app-router"
+        },
+        {
+          "id": "components-location",
+          "path": "components",
+          "severity": "warning",
+          "message": "Shared components should be in components/ directory",
+          "docs": "structure.md#components"
+        },
+        {
+          "id": "lib-utilities",
+          "path": "lib",
+          "severity": "info",
+          "message": "Utility functions should be in lib/ directory",
+          "docs": "structure.md#utilities"
+        },
+        {
+          "id": "public-assets",
+          "path": "public",
+          "severity": "error",
+          "message": "Static assets must be in public/ directory",
+          "docs": "structure.md#assets"
+        }
+      ]
+    },
+    "patterns": {
+      "weight": 25,
+      "rules": [
+        {
+          "id": "server-components-default",
+          "severity": "advisory",
+          "message": "Prefer Server Components by default, use 'use client' only when needed",
+          "docs": "patterns.md#server-components"
+        },
+        {
+          "id": "data-fetching-server",
+          "pattern": "async function.*fetch\\(",
+          "severity": "info",
+          "message": "Fetch data in Server Components when possible",
+          "docs": "patterns.md#data-fetching"
+        },
+        {
+          "id": "avoid-useeffect-fetching",
+          "pattern": "useEffect.*fetch\\(",
+          "severity": "warning",
+          "message": "Avoid fetching in useEffect - use Server Components or SWR/React Query",
+          "docs": "patterns.md#client-fetching"
+        },
+        {
+          "id": "loading-states",
+          "pattern": "loading\\.(tsx|jsx)$",
+          "filePattern": "app/.*\\.(tsx|jsx)$",
+          "severity": "info",
+          "message": "Use loading.tsx for route loading states",
+          "docs": "patterns.md#loading-states"
+        }
+      ]
+    },
+    "testing": {
+      "weight": 20,
+      "rules": [
+        {
+          "id": "test-file-colocation",
+          "pattern": "\\.(test|spec)\\.(tsx?|jsx?)$",
+          "severity": "info",
+          "message": "Colocate test files with components",
+          "docs": "testing.md#file-location"
+        },
+        {
+          "id": "component-testing",
+          "severity": "advisory",
+          "message": "Use React Testing Library for component tests",
+          "docs": "testing.md#component-testing"
+        },
+        {
+          "id": "e2e-testing",
+          "path": "e2e",
+          "severity": "advisory",
+          "message": "Use Playwright or Cypress for E2E tests",
+          "docs": "testing.md#e2e-testing"
+        },
+        {
+          "id": "test-coverage",
+          "metric": "coverage",
+          "threshold": 70,
+          "severity": "warning",
+          "message": "Aim for at least 70% test coverage",
+          "docs": "testing.md#coverage"
+        }
+      ]
+    },
+    "security": {
+      "weight": 15,
+      "rules": [
+        {
+          "id": "env-variables",
+          "pattern": "NEXT_PUBLIC_",
+          "severity": "warning",
+          "message": "Only expose necessary env vars with NEXT_PUBLIC_ prefix",
+          "docs": "security.md#environment-variables"
+        },
+        {
+          "id": "api-route-validation",
+          "severity": "error",
+          "message": "Validate and sanitize all API route inputs",
+          "docs": "security.md#input-validation"
+        },
+        {
+          "id": "csrf-protection",
+          "severity": "warning",
+          "message": "Implement CSRF protection for state-changing operations",
+          "docs": "security.md#csrf"
+        },
+        {
+          "id": "xss-prevention",
+          "pattern": "dangerouslySetInnerHTML",
+          "severity": "error",
+          "message": "Avoid dangerouslySetInnerHTML - sanitize HTML if necessary",
+          "docs": "security.md#xss"
+        }
+      ]
+    },
+    "production": {
+      "weight": 15,
+      "rules": [
+        {
+          "id": "no-console-logs",
+          "pattern": "console\\.(log|warn|error|debug|info)\\s*\\(",
+          "filePattern": "(app|components|lib)/.*\\.(tsx?|jsx?)$",
+          "severity": "warning",
+          "message": "Console statements should be removed in production",
+          "docs": "production.md#console-logs"
+        },
+        {
+          "id": "no-dev-only-code",
+          "pattern": "process\\.env\\.NODE_ENV\\s*[!=]==?\\s*['\"]development['\"]",
+          "filePattern": "(app|components|lib)/.*\\.(tsx?|jsx?)$",
+          "severity": "warning",
+          "message": "Development-only code blocks should be reviewed",
+          "docs": "production.md#dev-code"
+        },
+        {
+          "id": "env-vars-required",
+          "pattern": "process\\.env\\.[A-Z_]+",
+          "severity": "error",
+          "message": "Ensure all required environment variables are set in production",
+          "docs": "production.md#env-vars"
+        },
+        {
+          "id": "build-optimized",
+          "filePattern": "next\\.config\\.(js|mjs|ts)$",
+          "severity": "info",
+          "message": "Verify production build optimizations in next.config",
+          "docs": "production.md#build-config"
+        }
+      ]
+    }
+  }
+}
