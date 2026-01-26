@@ -87,13 +87,44 @@ detect_project_type() {
         fi
     fi
 
+    # Check for Python (requirements.txt or pyproject.toml)
+    if [ -f "${PROJECT_DIR}/requirements.txt" ] || [ -f "${PROJECT_DIR}/pyproject.toml" ]; then
+        if is_language_enabled "python"; then
+            echo "python"
+            return 0
+        fi
+    fi
+
     echo "unknown"
     return 1
+}
+
+# Function to detect Python frameworks
+detect_python_frameworks() {
+    local frameworks=()
+
+    # Check requirements.txt
+    if [ -f "${PROJECT_DIR}/requirements.txt" ]; then
+        grep -qi "django" "${PROJECT_DIR}/requirements.txt" 2>/dev/null && frameworks+=("django")
+        grep -qi "fastapi\|uvicorn" "${PROJECT_DIR}/requirements.txt" 2>/dev/null && frameworks+=("fastapi")
+        grep -qi "jupyter\|pandas\|scikit-learn\|tensorflow\|numpy" "${PROJECT_DIR}/requirements.txt" 2>/dev/null && frameworks+=("datascience")
+    fi
+
+    # Check pyproject.toml
+    if [ -f "${PROJECT_DIR}/pyproject.toml" ]; then
+        grep -qi "django" "${PROJECT_DIR}/pyproject.toml" 2>/dev/null && frameworks+=("django")
+        grep -qi "fastapi" "${PROJECT_DIR}/pyproject.toml" 2>/dev/null && frameworks+=("fastapi")
+        grep -qi "jupyter\|pandas\|numpy\|scikit-learn" "${PROJECT_DIR}/pyproject.toml" 2>/dev/null && frameworks+=("datascience")
+    fi
+
+    # Remove duplicates and output
+    echo "${frameworks[@]}" | tr ' ' '\n' | sort -u | tr '\n' ',' | sed 's/,$//'
 }
 
 # Function to get project display name
 get_project_name() {
     local project_type="$1"
+    local frameworks="$2"
     case "${project_type}" in
         laravel)
             echo "Laravel"
@@ -103,6 +134,15 @@ get_project_name() {
             ;;
         flutter)
             echo "Flutter"
+            ;;
+        python)
+            if [ -n "${frameworks}" ]; then
+                # Convert comma-separated frameworks to readable format
+                local fw_display=$(echo "${frameworks}" | sed 's/,/, /g' | sed 's/django/Django/g; s/fastapi/FastAPI/g; s/datascience/Data Science/g')
+                echo "Python (${fw_display})"
+            else
+                echo "Python"
+            fi
             ;;
         *)
             echo "Unknown"
@@ -123,11 +163,20 @@ main() {
         exit 0
     fi
 
-    PROJECT_NAME=$(get_project_name "${PROJECT_TYPE}")
+    # Detect Python frameworks if Python project
+    PYTHON_FRAMEWORKS=""
+    if [ "${PROJECT_TYPE}" = "python" ]; then
+        PYTHON_FRAMEWORKS=$(detect_python_frameworks)
+    fi
 
-    # Set environment variable for other scripts/skills
+    PROJECT_NAME=$(get_project_name "${PROJECT_TYPE}" "${PYTHON_FRAMEWORKS}")
+
+    # Set environment variables for other scripts/skills
     if [ -n "${CLAUDE_ENV_FILE}" ]; then
         echo "PROJECT_TYPE=${PROJECT_TYPE}" >> "${CLAUDE_ENV_FILE}"
+        if [ "${PROJECT_TYPE}" = "python" ] && [ -n "${PYTHON_FRAMEWORKS}" ]; then
+            echo "PYTHON_FRAMEWORKS=${PYTHON_FRAMEWORKS}" >> "${CLAUDE_ENV_FILE}"
+        fi
     fi
 
     # Output brief status message

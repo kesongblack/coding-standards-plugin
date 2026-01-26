@@ -1,0 +1,330 @@
+{
+  "version": "1.0.0",
+  "language": "python",
+  "lastUpdated": "2026-01-27T00:00:00Z",
+  "categories": {
+    "naming": {
+      "weight": 20,
+      "rules": [
+        {
+          "id": "class-naming",
+          "pattern": "^class\\s+([A-Z][a-zA-Z0-9]*):",
+          "severity": "error",
+          "message": "Classes must use PascalCase (PEP 8)",
+          "docs": "naming.md#classes",
+          "frameworks": ["*"]
+        },
+        {
+          "id": "function-naming",
+          "pattern": "^def\\s+([a-z_][a-z0-9_]*)\\(",
+          "severity": "error",
+          "message": "Functions and methods must use snake_case (PEP 8)",
+          "docs": "naming.md#functions",
+          "frameworks": ["*"]
+        },
+        {
+          "id": "constant-naming",
+          "pattern": "^[A-Z][A-Z0-9_]*\\s*=",
+          "severity": "warning",
+          "message": "Module-level constants should use UPPER_SNAKE_CASE (PEP 8)",
+          "docs": "naming.md#constants",
+          "frameworks": ["*"]
+        },
+        {
+          "id": "django-model-naming",
+          "pattern": "^class\\s+([A-Z][a-zA-Z0-9]*)\\(.*models\\.Model",
+          "filePattern": ".*/models\\.py$",
+          "severity": "error",
+          "message": "Django models must use singular PascalCase",
+          "docs": "frameworks/django.md#models",
+          "frameworks": ["django"]
+        },
+        {
+          "id": "private-method-naming",
+          "pattern": "^def\\s+_[a-z][a-z0-9_]*\\(",
+          "severity": "info",
+          "message": "Private methods should start with single underscore",
+          "docs": "naming.md#private-members",
+          "frameworks": ["*"]
+        }
+      ]
+    },
+    "structure": {
+      "weight": 20,
+      "rules": [
+        {
+          "id": "init-files",
+          "pattern": "__init__\\.py$",
+          "severity": "warning",
+          "message": "Package directories should contain __init__.py",
+          "docs": "folder-structure.md#packages",
+          "frameworks": ["*"]
+        },
+        {
+          "id": "django-app-structure",
+          "filePattern": ".*/apps/[^/]+/",
+          "severity": "info",
+          "message": "Django apps should follow standard structure (models, views, urls, admin)",
+          "docs": "frameworks/django.md#app-structure",
+          "frameworks": ["django"]
+        },
+        {
+          "id": "fastapi-routers",
+          "filePattern": ".*/routers/.*\\.py$",
+          "severity": "info",
+          "message": "FastAPI endpoints should be organized in routers/",
+          "docs": "frameworks/fastapi.md#router-organization",
+          "frameworks": ["fastapi"]
+        },
+        {
+          "id": "test-directory",
+          "pattern": "tests/",
+          "severity": "warning",
+          "message": "Tests should be in tests/ directory mirroring source structure",
+          "docs": "testing.md#test-structure",
+          "frameworks": ["*"]
+        },
+        {
+          "id": "circular-imports",
+          "pattern": "import.*from.*import",
+          "severity": "error",
+          "message": "Avoid circular imports - use dependency injection or restructure",
+          "docs": "folder-structure.md#circular-imports",
+          "frameworks": ["*"]
+        }
+      ]
+    },
+    "patterns": {
+      "weight": 25,
+      "rules": [
+        {
+          "id": "type-hints",
+          "pattern": "def\\s+\\w+\\([^)]*\\)\\s*->\\s*\\w+:",
+          "severity": "warning",
+          "message": "Use type hints on function signatures (PEP 484)",
+          "docs": "patterns.md#type-hints",
+          "frameworks": ["*"]
+        },
+        {
+          "id": "context-managers",
+          "pattern": "with\\s+open\\(",
+          "severity": "info",
+          "message": "Use context managers for file operations",
+          "docs": "patterns.md#context-managers",
+          "frameworks": ["*"]
+        },
+        {
+          "id": "f-strings",
+          "pattern": "f[\"']",
+          "severity": "info",
+          "message": "Prefer f-strings over .format() or % formatting",
+          "docs": "patterns.md#string-formatting",
+          "frameworks": ["*"]
+        },
+        {
+          "id": "mutable-defaults",
+          "pattern": "def\\s+\\w+\\([^)]*=\\s*\\[\\]",
+          "severity": "error",
+          "message": "Never use mutable default arguments (use None and initialize in function)",
+          "docs": "patterns.md#mutable-defaults",
+          "frameworks": ["*"]
+        },
+        {
+          "id": "pathlib-usage",
+          "pattern": "from pathlib import Path",
+          "severity": "info",
+          "message": "Use pathlib.Path instead of os.path",
+          "docs": "patterns.md#pathlib",
+          "frameworks": ["*"]
+        },
+        {
+          "id": "django-orm-optimization",
+          "pattern": "select_related\\(|prefetch_related\\(",
+          "severity": "info",
+          "message": "Use select_related() and prefetch_related() to optimize queries",
+          "docs": "frameworks/django.md#orm-optimization",
+          "frameworks": ["django"]
+        },
+        {
+          "id": "fastapi-async",
+          "pattern": "async\\s+def\\s+\\w+\\(",
+          "severity": "info",
+          "message": "Use async/await for I/O operations in FastAPI",
+          "docs": "frameworks/fastapi.md#async-operations",
+          "frameworks": ["fastapi"]
+        },
+        {
+          "id": "pydantic-models",
+          "pattern": "class\\s+\\w+\\(BaseModel\\)",
+          "severity": "info",
+          "message": "Use Pydantic models for request/response validation",
+          "docs": "frameworks/fastapi.md#pydantic-validation",
+          "frameworks": ["fastapi"]
+        },
+        {
+          "id": "pandas-vectorization",
+          "pattern": "\\.apply\\(|for .* in .*\\.iterrows\\(\\)",
+          "severity": "warning",
+          "message": "Avoid iterating DataFrames - use vectorization instead",
+          "docs": "frameworks/datascience.md#vectorization",
+          "frameworks": ["datascience"]
+        },
+        {
+          "id": "list-comprehensions",
+          "pattern": "\\[.* for .* in .*\\]",
+          "severity": "info",
+          "message": "Use list comprehensions for simple transformations",
+          "docs": "patterns.md#comprehensions",
+          "frameworks": ["*"]
+        }
+      ]
+    },
+    "testing": {
+      "weight": 20,
+      "rules": [
+        {
+          "id": "test-file-naming",
+          "pattern": "test_.*\\.py$|.*_test\\.py$",
+          "severity": "error",
+          "message": "Test files must be named test_*.py or *_test.py",
+          "docs": "testing.md#naming",
+          "frameworks": ["*"]
+        },
+        {
+          "id": "test-function-naming",
+          "pattern": "def\\s+test_\\w+",
+          "severity": "error",
+          "message": "Test functions must start with test_",
+          "docs": "testing.md#naming",
+          "frameworks": ["*"]
+        },
+        {
+          "id": "pytest-fixtures",
+          "pattern": "@pytest\\.fixture",
+          "severity": "info",
+          "message": "Use pytest fixtures for setup/teardown",
+          "docs": "testing.md#fixtures",
+          "frameworks": ["*"]
+        },
+        {
+          "id": "parametrize-tests",
+          "pattern": "@pytest\\.mark\\.parametrize",
+          "severity": "info",
+          "message": "Use parametrize for testing multiple cases",
+          "docs": "testing.md#parametrization",
+          "frameworks": ["*"]
+        },
+        {
+          "id": "coverage-threshold",
+          "pattern": "# pragma: no cover",
+          "severity": "warning",
+          "message": "Aim for 70% minimum coverage, 100% for critical paths",
+          "docs": "testing.md#coverage",
+          "frameworks": ["*"]
+        },
+        {
+          "id": "django-test-case",
+          "pattern": "class\\s+\\w+\\(TestCase\\)",
+          "severity": "info",
+          "message": "Use Django TestCase for database tests",
+          "docs": "frameworks/django.md#testing",
+          "frameworks": ["django"]
+        },
+        {
+          "id": "fastapi-test-client",
+          "pattern": "from fastapi\\.testclient import TestClient",
+          "severity": "info",
+          "message": "Use TestClient for FastAPI endpoint testing",
+          "docs": "frameworks/fastapi.md#testing",
+          "frameworks": ["fastapi"]
+        },
+        {
+          "id": "mock-external-services",
+          "pattern": "@patch\\(|@mock\\.",
+          "severity": "info",
+          "message": "Mock external services in tests",
+          "docs": "testing.md#mocking",
+          "frameworks": ["*"]
+        }
+      ]
+    },
+    "security": {
+      "weight": 15,
+      "rules": [
+        {
+          "id": "hardcoded-secrets",
+          "pattern": "(password|api_key|secret|token)\\s*=\\s*[\"'][^\"']+[\"']",
+          "severity": "error",
+          "message": "Never hardcode secrets - use environment variables",
+          "docs": "security.md#secrets",
+          "frameworks": ["*"]
+        },
+        {
+          "id": "sql-injection",
+          "pattern": "execute\\(.*%.*\\)|cursor\\.execute\\(.*\\+",
+          "severity": "error",
+          "message": "Use parameterized queries to prevent SQL injection",
+          "docs": "security.md#sql-injection",
+          "frameworks": ["*"]
+        },
+        {
+          "id": "path-traversal",
+          "pattern": "open\\(.*\\+|os\\.path\\.join\\(.*input",
+          "severity": "error",
+          "message": "Validate user-provided paths to prevent path traversal",
+          "docs": "security.md#path-traversal",
+          "frameworks": ["*"]
+        },
+        {
+          "id": "input-validation",
+          "pattern": "request\\.(GET|POST|args|form)\\[",
+          "severity": "warning",
+          "message": "Validate all external input",
+          "docs": "security.md#input-validation",
+          "frameworks": ["*"]
+        },
+        {
+          "id": "django-debug-production",
+          "pattern": "DEBUG\\s*=\\s*True",
+          "filePattern": ".*/settings\\.py$",
+          "severity": "error",
+          "message": "Never set DEBUG=True in production",
+          "docs": "frameworks/django.md#production-security",
+          "frameworks": ["django"]
+        },
+        {
+          "id": "django-csrf",
+          "pattern": "csrf_exempt|CSRF_COOKIE_SECURE\\s*=\\s*False",
+          "severity": "error",
+          "message": "Keep CSRF protection enabled",
+          "docs": "frameworks/django.md#csrf",
+          "frameworks": ["django"]
+        },
+        {
+          "id": "fastapi-cors",
+          "pattern": "CORSMiddleware.*allow_origins=\\[\"\\*\"\\]",
+          "severity": "warning",
+          "message": "Restrict CORS origins - don't use wildcard in production",
+          "docs": "frameworks/fastapi.md#cors",
+          "frameworks": ["fastapi"]
+        },
+        {
+          "id": "pickle-safety",
+          "pattern": "pickle\\.loads?\\(",
+          "severity": "warning",
+          "message": "Avoid pickle with untrusted data - use JSON instead",
+          "docs": "frameworks/datascience.md#pickle-safety",
+          "frameworks": ["datascience"]
+        },
+        {
+          "id": "print-statements",
+          "pattern": "\\bprint\\(",
+          "severity": "warning",
+          "message": "Use logging module instead of print() in production code",
+          "docs": "production.md#logging",
+          "frameworks": ["*"]
+        }
+      ]
+    }
+  }
+}

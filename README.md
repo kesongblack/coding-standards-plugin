@@ -1,11 +1,11 @@
 # Coding Standards Plugin
 
-A comprehensive, multi-language coding standards system for Claude Code that automatically detects project types and enforces best practices across Laravel, Next.js, and Flutter projects.
+A comprehensive, multi-language coding standards system for Claude Code that automatically detects project types and enforces best practices across Laravel, Next.js, Flutter, and Python projects.
 
 ## Features
 
 - **Auto-Detection**: Automatically detects project type on session start
-- **Multi-Language Support**: Laravel (PHP), Next.js (React/TypeScript), Flutter (Dart)
+- **Multi-Language Support**: Laravel (PHP), Next.js (React/TypeScript), Flutter (Dart), Python (Django/FastAPI/Data Science)
 - **Automated Audits**: Quick scans on session start, full audits on demand
 - **Interactive Commands**: `/audit`, `/refactor`, `/standards`, and more
 - **Version Controlled Standards**: Git-based for team sharing and customization
@@ -46,6 +46,7 @@ Which language standards would you like to enable?
 [ ] Laravel (PHP)
 [ ] Next.js (React/TypeScript)
 [ ] Flutter (Dart)
+[ ] Python (Django/FastAPI/Data Science)
 ```
 
 Or run manually:
@@ -87,9 +88,17 @@ Or run manually:
 ### Auto-Audit on Session Start
 
 When you open a supported project, the plugin automatically:
-1. Detects project type (Laravel/Next.js/Flutter)
-2. Runs a quick audit
-3. Displays summary: "📋 [Language] project | Score: X/100 | N issues found"
+1. Detects project type (Laravel/Next.js/Flutter/Python)
+2. For Python projects, detects frameworks (Django, FastAPI, Data Science)
+3. Runs a quick audit
+4. Displays summary: "📋 [Language] project | Score: X/100 | N issues found"
+
+**Python framework detection:**
+- Django: Detected from `requirements.txt` or `pyproject.toml`
+- FastAPI: Detected from `fastapi` or `uvicorn` dependencies
+- Data Science: Detected from `jupyter`, `pandas`, `numpy`, `scikit-learn`, `tensorflow`
+
+Example output: `📋 Python project (Django, FastAPI) detected`
 
 ## Configuration
 
@@ -99,7 +108,7 @@ Configuration is stored in `~/projects/coding-standards-plugin/.local/config.jso
 
 ```json
 {
-  "enabledLanguages": ["laravel", "nextjs"],
+  "enabledLanguages": ["laravel", "nextjs", "python"],
   "mode": "global",
   "strictness": "advisory",
   "autoAuditOnStart": true,
@@ -132,6 +141,44 @@ Each language includes standards for:
 - **Patterns**: Design patterns, best practices
 - **Testing**: Test structure, coverage requirements
 - **Security**: Common vulnerabilities, secure coding practices
+
+### Python Standards
+
+Python standards follow PEP 8 and include framework-specific best practices:
+
+**Core Standards:**
+- **Naming (PEP 8)**: snake_case functions, PascalCase classes, UPPER_SNAKE_CASE constants
+- **Type Hints**: Modern Python 3.9+ type annotations
+- **Patterns**: Context managers, f-strings, pathlib, list comprehensions
+- **Testing**: pytest, 70% minimum coverage, 100% for critical paths
+- **Security**: No hardcoded secrets, parameterized queries, input validation
+
+**Django-Specific:**
+- Model naming (singular PascalCase)
+- ORM optimization (select_related, prefetch_related)
+- Class-based views
+- CSRF protection, DEBUG=False in production
+- Proper signals usage
+
+**FastAPI-Specific:**
+- Async/await for I/O operations
+- Pydantic models for validation
+- Dependency injection patterns
+- CORS configuration (no wildcards)
+- OAuth2/JWT authentication
+
+**Data Science-Specific:**
+- Vectorization over iteration (pandas/NumPy)
+- No DataFrame.iterrows() usage
+- Reproducible random seeds
+- Pipeline patterns for transformations
+- Pickle safety (avoid with untrusted data)
+
+**Production Readiness:**
+- Use logging module (not print statements)
+- Environment variables for configuration
+- Error handling for external services
+- Health check endpoints
 
 ## Updating Standards
 
@@ -176,7 +223,12 @@ coding-standards-plugin/
 ├── standards/               # Standards definitions
 │   ├── laravel/
 │   ├── nextjs/
-│   └── flutter/
+│   ├── flutter/
+│   └── python/              # PEP 8, Django, FastAPI, Data Science
+│       ├── frameworks/      # Framework-specific standards
+│       │   ├── django.md
+│       │   ├── fastapi.md
+│       │   └── datascience.md
 └── tests/                   # Test fixtures
 ```
 
@@ -265,19 +317,19 @@ production_audit:
 
 **Checks by framework:**
 
-| Laravel | Next.js | Flutter |
-|---------|---------|---------|
-| APP_DEBUG=false | No console.log | Debug banner disabled |
-| .env not exposed | Env vars set | No print statements |
-| No seeders in routes | Build optimized | Release signing configured |
-| No dd/dump calls | No dev-only code | kDebugMode checks |
+| Laravel | Next.js | Flutter | Python |
+|---------|---------|---------|--------|
+| APP_DEBUG=false | No console.log | Debug banner disabled | DEBUG=False (Django) |
+| .env not exposed | Env vars set | No print statements | No hardcoded secrets |
+| No seeders in routes | Build optimized | Release signing configured | Logging (not print) |
+| No dd/dump calls | No dev-only code | kDebugMode checks | Env variables configured |
 
 ## Scripts
 
 | Script | Description |
 |--------|-------------|
 | `scripts/install.sh` | Creates symlink to Claude Code plugins directory |
-| `scripts/detect-project.sh` | Detects project type (Laravel/Next.js/Flutter) |
+| `scripts/detect-project.sh` | Detects project type (Laravel/Next.js/Flutter/Python) and Python frameworks |
 | `scripts/validate-standards.sh` | Validates rules.json schema and syntax |
 
 ## License
